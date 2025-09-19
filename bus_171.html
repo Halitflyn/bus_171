@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Розклад маршрутки 171 Басівка ↔ Львів</title>
+  <!-- Favicon з емодзі 🚍 -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚍</text></svg>">
+  <!-- PWA Manifest вбудований як data URI -->
+  <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogItCk0L7Qt9C60LvQsNC0INC/0LDRgdC30LjRj9GC0YwgMTcxIOKGkiDQttC60LvQt9C60LAg4obQu9Cw0LLRj9GC0Ywg4obQstCw0LLQuNGPINGC0LvRg9C5INC/0YDQuNCy0L7Qu9GM0YnRgtC1IiwKICAic2hvcnRfbmFtZSI6ICLQpNC+0LfQutC70LDQtCDQv9Cw0YHQsdC40Y/RgtGMIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sLDxzdmcgeG1sbnM9XCJodHRwOi8vd3d3LndzLm9yZy8yMDAwL3N2Z1wiIHZpZXdCb3g9XCIwIDAgMTAwIDEwMFwiPjx0ZXh0IHk9XCIuOWVtXCIgZm9udC1zaXplPVwiOTBcIj7wn5KIPC90ZXh0Pjwvc3ZnPiIsCiAgICAgICJzaXplcyI6ICIxOTJ4MTkyIiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIKICAgIH0KICBdLAogICJzdGFydF91cmwiOiAiLi8iLAogICJkaXNwbGF5IjogImZ1bGxzY3JlZW4iLAogICJ0aGVtZV9jb2xvciI6ICIjNGNhZjUwIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjZjVmNWY1Igp9Cg==">
+  <meta name="theme-color" content="#4caf50">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#121212">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -181,17 +187,29 @@ function openTab(id){
   schedules.forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   document.querySelector(`.tab[data-target="${id}"]`).classList.add('active');
+  highlightTimes(); // Оновити підсвічування при перемиканні
 }
 
 // Автовибір вкладки
-const today = new Date().getDay();
-if(today === 6 || today === 0) openTab('weekend'); else openTab('weekdays');
+const todayForInit = new Date().getDay();
+if(todayForInit === 6 || todayForInit === 0) openTab('weekend'); else openTab('weekdays');
 
-// Підсвічування рейсів
+// Підсвічування рейсів лише для сьогоднішнього типу дня
 function highlightTimes(){
-  document.querySelectorAll('.times').forEach(div => {
+  const activeSchedule = document.querySelector('.schedule.active');
+  if (!activeSchedule) return;
+
+  const today = new Date().getDay();
+  const isTodayWeekend = (today === 0 || today === 6);
+  const activeId = activeSchedule.id;
+  const isMatchingDay = (activeId === 'weekdays' && !isTodayWeekend) || (activeId === 'weekend' && isTodayWeekend);
+
+  activeSchedule.querySelectorAll('.times').forEach(div => {
     div.innerHTML = div.textContent.split(/\s+/).map(time => {
       if(!time) return '';
+      if (!isMatchingDay) {
+        return `<span>${time}</span>`;
+      }
       const [h,m] = time.split(':').map(Number);
       const now = new Date();
       const dep = new Date(); dep.setHours(h,m,0,0);
