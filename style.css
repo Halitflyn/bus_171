@@ -1,4 +1,5 @@
 :root {
+  /* ... (всі ваші змінні залишаються без змін) ... */
   --bg-light: #f5f5f5;
   --text-light: #222;
   --card-bg-light: rgba(255,255,255,0.9);
@@ -14,12 +15,27 @@
   --next-color: #ff9800;
 }
 
+/* ПОКРАЩЕННЯ: Анімація появи */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
   transition: background 0.3s, color 0.3s;
+  /* Плавна прокрутка для кнопки "Наверх" */
+  scroll-behavior: smooth;
 }
+/* ... (стилі body.light та body.dark без змін) ... */
 body.light {
   background: var(--bg-light);
   color: var(--text-light);
@@ -73,6 +89,8 @@ main {
   padding: 10px;
   text-align: center;
   transition: background 0.3s;
+  /* ПОКРАЩЕННЯ: Застосовуємо анімацію */
+  animation: fadeIn 0.5s ease-out;
 }
 body.light .card { background: var(--card-bg-light); }
 body.dark .card { background: var(--card-bg-dark); }
@@ -84,6 +102,7 @@ h3 { margin-top: 0; }
   justify-content: center;
   gap: 8px; 
 }
+/* ... (стилі .times span, .onroute, .next, .past без змін) ... */
 .times span {
   display: inline-block;
   padding: 4px 8px;
@@ -109,6 +128,7 @@ body.dark .times span { background: var(--span-bg-dark); }
   opacity: 0.7;
 }
 
+/* ... (стилі .theme-toggle без змін) ... */
 .theme-toggle {
   position: fixed;
   top: 15px;
@@ -143,9 +163,7 @@ footer {
   opacity: 0.8;
 }
 
-/* --- ПОКРАЩЕННЯ: Нові стилі --- */
-
-/* Контейнер для інфо-картки, щоб вона була по центру */
+/* --- ПОКРАЩЕННЯ: Нові стилі з минулого кроку --- */
 .grid-info {
   display: grid;
   padding: 10px;
@@ -153,21 +171,16 @@ footer {
   margin: 10px auto 0 auto;
   gap: 15px;
 }
-
-/* Стиль для самої інфо-картки */
 .info-card {
-  /* Займає всю ширину, якщо в .grid-info лише 1 колонка */
   grid-column: 1 / -1; 
   text-align: left;
-  padding: 15px 25px; /* Більші відступи */
+  padding: 15px 25px;
   line-height: 1.6;
 }
 .info-card h3 {
   text-align: center;
   margin-bottom: 15px;
 }
-
-/* Стиль для кнопки "Поділитися" */
 #shareButton {
   display: block;
   width: 100%;
@@ -183,10 +196,8 @@ footer {
   transition: background 0.3s;
 }
 #shareButton:hover {
-  background-color: #388e3c; /* Темніший зелений */
+  background-color: #388e3c; 
 }
-
-/* Стиль для тексту "Актуально на" */
 footer small {
   display: block;
   margin-top: 10px;
@@ -194,7 +205,71 @@ footer small {
   font-style: italic;
 }
 
+/* --- ПОКРАЩЕННЯ: Нові стилі для цього кроку --- */
+
+/* 1. Кнопка "Наверх" */
+#scrollTopBtn {
+  display: none; /* Сховано за замовчуванням */
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 100;
+  border: none;
+  outline: none;
+  background-color: var(--accent-color);
+  color: white;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 50%; /* Кругла */
+  width: 40px;
+  height: 40px;
+  font-size: 16px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  opacity: 0.8;
+  transition: opacity 0.3s;
+}
+#scrollTopBtn:hover {
+  opacity: 1;
+}
+
+/* 2. Повідомлення про оновлення (Toast) */
+.update-toast {
+  position: fixed;
+  bottom: 15px;
+  left: 15px;
+  z-index: 2000;
+  background-color: #333;
+  color: #eee;
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  /* Анімація появи */
+  animation: fadeIn 0.5s ease;
+}
+.update-toast p {
+  margin: 0;
+  font-size: 14px;
+}
+.update-toast button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background-color: var(--accent-color);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
 
 @media (max-width: 768px) {
   .grid { grid-template-columns: 1fr; }
+  /* Робимо повідомлення на всю ширину на мобільних */
+  .update-toast {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+  }
 }
