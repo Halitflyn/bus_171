@@ -1,14 +1,13 @@
-// Назва кешу.
-const CACHE_NAME = 'bus-schedule-v1';
+const CACHE_NAME = 'bus-schedule-v1.04';
 
-// Файли, які потрібно закешувати (ШЛЯХИ ВИПРАВЛЕНО)
+// Файли, які потрібно закешувати (список не змінився)
 const urlsToCache = [
   '.', // Головна сторінка
   'index.html',
   'style.css',
   'script.js',
   'manifest.json',
-  'icon.svg' // <-- ШЛЯХ ВИПРАВЛЕНО
+  'icon.svg'
 ];
 
 // 1. Встановлення Service Worker: кешуємо файли
@@ -16,8 +15,13 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('ServiceWorker: Кешуємо файли');
+        console.log('ServiceWorker: Кешуємо нову версію файлів (v2)');
         return cache.addAll(urlsToCache);
+      })
+      .then(() => {
+        // Примусово активуємо новий Service Worker одразу,
+        // не чекаючи, поки стара вкладка закриється
+        return self.skipWaiting();
       })
   );
 });
@@ -50,7 +54,7 @@ self.addEventListener('fetch', event => {
 
 // 3. Активація Service Worker: очистка старого кешу
 self.addEventListener('activate', event => {
-  const cacheWhitelist = [CACHE_NAME];
+  const cacheWhitelist = [CACHE_NAME]; // Тільки v2 залишаємо
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
@@ -61,6 +65,10 @@ self.addEventListener('activate', event => {
           }
         })
       );
+    })
+    .then(() => {
+      // Повідомляємо всі відкриті вкладки, що вони можуть оновитися
+      return self.clients.claim();
     })
   );
 });
