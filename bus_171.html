@@ -1,1 +1,210 @@
-1
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Розклад маршрутки 171 Басівка ↔ Львів</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.light {
+      background: #f5f5f5;
+      color: #222;
+    }
+    body.dark {
+      background: #121212;
+      color: #eee;
+    }
+    .tabs {
+      display: flex;
+      justify-content: center;
+      margin: 10px 0;
+    }
+    .tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 10px;
+      margin: 0 5px;
+      background: #ccc;
+      transition: 0.3s;
+      color: #000;
+    }
+    .tab.active {
+      background: #4caf50;
+      color: white;
+    }
+    .schedule {
+      display: none;
+      padding: 10px;
+      max-width: 1000px;
+      margin: auto;
+    }
+    .schedule.active { display: block; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    .card {
+      background: rgba(255,255,255,0.9);
+      border-radius: 12px;
+      padding: 10px;
+      text-align: center;
+      transition: background 0.3s;
+    }
+    body.dark .card {
+      background: rgba(30,30,30,0.9);
+    }
+    h3 { margin-top: 0; }
+    .times span {
+      display: inline-block;
+      margin: 4px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: rgba(0,0,0,0.05);
+    }
+    body.dark .times span {
+      background: rgba(255,255,255,0.1);
+    }
+    .onroute { background: #2196f3 !important; color: #fff; }
+    .next { background: #ff9800 !important; color: #fff; }
+
+    /* Тумблер теми */
+    .theme-toggle {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      width: 40px;
+      height: 20px;
+      border-radius: 20px;
+      background: #ccc;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .toggle-circle {
+      width: 18px;
+      height: 18px;
+      background: white;
+      border-radius: 50%;
+      position: relative;
+      top: 1px;
+      left: 1px;
+      transition: 0.3s;
+    }
+    body.dark .theme-toggle { background: #666; }
+    body.dark .toggle-circle { transform: translateX(20px); background: #ffeb3b; }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    @media (max-width: 768px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body class="light">
+  <div class="theme-toggle" id="themeToggle"><div class="toggle-circle"></div></div>
+
+  <div class="tabs">
+    <div class="tab" data-target="weekdays">Будні</div>
+    <div class="tab" data-target="weekend">Субота-Неділя</div>
+  </div>
+
+  <!-- Будні -->
+  <div id="weekdays" class="schedule">
+    <div class="grid">
+      <div class="card">
+        <h3>Зі Басівки (1-й)</h3>
+        <div class="times">5:45 7:10 8:30 10:00 12:30 14:30 16:00 17:45 19:45</div>
+      </div>
+      <div class="card">
+        <h3>Зі Басівки (2-й)</h3>
+        <div class="times">6:30 7:50 9:15 11:00 13:45 15:15 16:45 18:45</div>
+      </div>
+      <div class="card">
+        <h3>Зі Львова (1-й)</h3>
+        <div class="times">6:30 7:50 9:15 10:45 13:15 15:15 16:45 18:30 20:30</div>
+      </div>
+      <div class="card">
+        <h3>Зі Львова (2-й)</h3>
+        <div class="times">7:10 8:30 10:00 11:45 14:30 16:00 17:30 19:30</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Вихідні -->
+  <div id="weekend" class="schedule">
+    <div class="grid">
+      <div class="card">
+        <h3>Зі Басівки</h3>
+        <div class="times">6:30 8:00 9:30 11:00 13:30 15:45 17:30 19:15</div>
+      </div>
+      <div class="card">
+        <h3>Зі Львова</h3>
+        <div class="times">7:15 8:45 10:15 11:45 14:15 16:30 18:15 20:00</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    🚍 Розклад маршрутки №171 Басівка ↔ Львів<br>
+    Сайт створив Halitflyn © 2025
+  </footer>
+
+<script>
+// Перемикач теми
+const body = document.body;
+const toggle = document.getElementById('themeToggle');
+if(localStorage.getItem('theme') === 'dark') body.className = 'dark';
+toggle.onclick = () => {
+  body.classList.toggle('dark');
+  body.classList.toggle('light');
+  localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
+};
+
+// Вкладки
+const tabs = document.querySelectorAll('.tab');
+const schedules = document.querySelectorAll('.schedule');
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => openTab(tab.dataset.target));
+});
+function openTab(id){
+  tabs.forEach(t=>t.classList.remove('active'));
+  schedules.forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelector(`.tab[data-target="${id}"]`).classList.add('active');
+}
+
+// Автовибір вкладки
+const today = new Date().getDay();
+if(today === 6 || today === 0) openTab('weekend'); else openTab('weekdays');
+
+// Підсвічування рейсів
+function highlightTimes(){
+  document.querySelectorAll('.times').forEach(div => {
+    div.innerHTML = div.textContent.split(/\s+/).map(time => {
+      if(!time) return '';
+      const [h,m] = time.split(':').map(Number);
+      const now = new Date();
+      const dep = new Date(); dep.setHours(h,m,0,0);
+      const diffMin = (dep - now)/60000;
+      if(diffMin <= 0 && diffMin > -40) return `<span class='onroute'>${time}</span>`;
+      if(diffMin > 0 && diffMin <= 30) return `<span class='next'>${time}</span>`;
+      return `<span>${time}</span>`;
+    }).join(' ');
+  });
+}
+highlightTimes();
+setInterval(highlightTimes, 60000);
+</script>
+
+</body>
+</html>
