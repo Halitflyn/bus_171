@@ -1,4 +1,3 @@
-/* Всі ваші CSS-змінні та стилі з <style> */
 :root {
   --bg-light: #f5f5f5;
   --text-light: #222;
@@ -34,11 +33,10 @@ header.tabs {
   display: flex;
   justify-content: center;
   margin: 10px 0;
-  role: "tablist"; /* Це в HTML, але коментар залишу */
+  role: "tablist"; 
 }
 
 main {
-  /* Щоб футер не налізав на контент */
   padding-bottom: 60px; 
 }
 
@@ -102,7 +100,6 @@ body.dark .times span { background: var(--span-bg-dark); }
   text-decoration: line-through;
 }
 
-/* ПОКРАЩЕННЯ: Новий стиль для Ідеї #6 */
 .no-buses-msg {
   display: block;
   width: 100%;
@@ -124,7 +121,7 @@ body.dark .times span { background: var(--span-bg-dark); }
   transition: background 0.3s;
   border: none;
   padding: 0;
-  z-index: 1000; /* Переконаємось, що він зверху */
+  z-index: 1000;
 }
 .toggle-circle {
   width: 18px;
@@ -145,6 +142,58 @@ footer {
   font-size: 14px;
   opacity: 0.8;
 }
+
+/* --- ПОКРАЩЕННЯ: Нові стилі --- */
+
+/* Контейнер для інфо-картки, щоб вона була по центру */
+.grid-info {
+  display: grid;
+  padding: 10px;
+  max-width: 1000px;
+  margin: 10px auto 0 auto;
+  gap: 15px;
+}
+
+/* Стиль для самої інфо-картки */
+.info-card {
+  /* Займає всю ширину, якщо в .grid-info лише 1 колонка */
+  grid-column: 1 / -1; 
+  text-align: left;
+  padding: 15px 25px; /* Більші відступи */
+  line-height: 1.6;
+}
+.info-card h3 {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+/* Стиль для кнопки "Поділитися" */
+#shareButton {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin-top: 15px;
+  font-size: 1em;
+  font-weight: bold;
+  color: white;
+  background-color: var(--accent-color);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+#shareButton:hover {
+  background-color: #388e3c; /* Темніший зелений */
+}
+
+/* Стиль для тексту "Актуально на" */
+footer small {
+  display: block;
+  margin-top: 10px;
+  opacity: 0.7;
+  font-style: italic;
+}
+
 
 @media (max-width: 768px) {
   .grid { grid-template-columns: 1fr; }
