@@ -1,14 +1,14 @@
 // Назва кешу.
-const CACHE_NAME = 'bus-schedule-v1.03';
+const CACHE_NAME = 'bus-schedule-v1';
 
 // Файли, які потрібно закешувати (ШЛЯХИ ВИПРАВЛЕНО)
 const urlsToCache = [
-  '.', // Головна сторінка (замість '/')
+  '.', // Головна сторінка
   'index.html',
   'style.css',
   'script.js',
   'manifest.json',
-  'images/icon.svg' // Переконайтесь, що цей шлях правильний
+  'icon.svg' // <-- ШЛЯХ ВИПРАВЛЕНО
 ];
 
 // 1. Встановлення Service Worker: кешуємо файли
@@ -64,6 +64,3 @@ self.addEventListener('activate', event => {
     })
   );
 });
-
-
-
