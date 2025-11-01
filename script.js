@@ -13,7 +13,7 @@ const scheduleData = {
 };
 
 /**
- * Заповнює HTML-контейнери даними з об'єкта scheduleData
+ * Заповнює HTML-контейнери
  */
 function populateTimes() {
   for (const dayType in scheduleData) {
@@ -59,12 +59,13 @@ function openTab(id) {
   const activeTab = document.querySelector(`.tab[data-target="${id}"]`);
   activeTab.classList.add('active');
   activeTab.setAttribute('aria-selected', 'true');
+  
+  // ПОКРАЩЕННЯ: Зберігаємо вибір користувача
+  localStorage.setItem('lastTab', id);
 }
 
 /**
- * ПОКРАЩЕННЯ: Ідеї #5 та #6
- * 1. Знаходить тільки ОДИН наступний рейс.
- * 2. Додає повідомлення "Рейсів більше немає".
+ * Підсвічування рейсів
  */
 function highlightTimes() {
   const now = new Date();
@@ -112,7 +113,7 @@ function highlightTimes() {
 }
 
 /**
- * ПОКРАЩЕННЯ: Ідея #7 - "Розумний" таймер
+ * "Розумний" таймер
  */
 function smartHighlightUpdate() {
   highlightTimes(); 
@@ -128,7 +129,7 @@ function smartHighlightUpdate() {
 }
 
 /**
- * Функція для автоматичного оновлення вкладки опівночі
+ * Опівнічна зміна вкладки
  */
 function scheduleMidnightTabCheck() {
   const now = new Date();
@@ -136,6 +137,9 @@ function scheduleMidnightTabCheck() {
   
   setTimeout(() => {
     console.log("Опівніч! Перевіряємо вкладку.");
+    // ПОКРАЩЕННЯ: Опівночі скидаємо збережену вкладку, щоб спрацювала авто-логіка
+    localStorage.removeItem('lastTab');
+    
     const today = new Date().getDay();
     if(today === 6 || today === 0) openTab('weekend'); else openTab('weekdays');
     
@@ -148,9 +152,15 @@ function scheduleMidnightTabCheck() {
 // 1. Заповнюємо розклад
 populateTimes();
 
-// 2. Автовибір вкладки
-const today = new Date().getDay();
-if(today === 6 || today === 0) openTab('weekend'); else openTab('weekdays');
+// 2. ПОКРАЩЕННЯ: Автовибір вкладки з пам'яттю
+const savedTab = localStorage.getItem('lastTab');
+if (savedTab) {
+  openTab(savedTab); // Відкриваємо ту, що збережена
+} else {
+  // Якщо нічого не збережено, вибираємо за днем тижня
+  const today = new Date().getDay();
+  if(today === 6 || today === 0) openTab('weekend'); else openTab('weekdays');
+}
 
 // 3. Запускаємо "розумний" таймер
 smartHighlightUpdate();
@@ -158,12 +168,32 @@ smartHighlightUpdate();
 // 4. Встановлюємо таймер на опівнічну зміну вкладки
 scheduleMidnightTabCheck();
 
-// 5. Реєстрація Service Worker (ШЛЯХ ВИПРАВЛЕНО)
+// 5. ПОКРАЩЕННЯ: Кнопка "Поділитися"
+const shareButton = document.getElementById('shareButton');
+// Перевіряємо, чи браузер взагалі підтримує navigator.share
+if (navigator.share) {
+  shareButton.addEventListener('click', async () => {
+    try {
+      await navigator.share({
+        title: 'Розклад 171 (Басівка-Львів)',
+        text: 'Актуальний офлайн-розклад маршрутки 171',
+        url: window.location.href // Ділимося поточною адресою
+      });
+      console.log('Сайтом успішно поділилися');
+    } catch (err) {
+      console.log('Помилка при спробі поділитися:', err);
+    }
+  });
+} else {
+  // Якщо функція не підтримується (напр. десктопний Firefox),
+  // просто ховаємо кнопку
+  shareButton.style.display = 'none';
+}
+
+
+// 6. Реєстрація Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    //
-    // ОСЬ ТУТ ГОЛОВНЕ ВИПРАВЛЕННЯ: прибрано '/'
-    //
     navigator.serviceWorker.register('service-worker.js')
       .then(registration => {
         console.log('ServiceWorker зареєстровано успішно!');
