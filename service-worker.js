@@ -1,5 +1,5 @@
 // Назва кешу.
-const CACHE_NAME = 'bus-schedule-v1';
+const CACHE_NAME = 'bus-schedule-v1.01';
 
 // Файли, які потрібно закешувати (ШЛЯХИ ВИПРАВЛЕНО)
 const urlsToCache = [
@@ -64,3 +64,4 @@ self.addEventListener('activate', event => {
     })
   );
 });
+
