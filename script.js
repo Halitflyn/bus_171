@@ -1,5 +1,6 @@
 // --- Архітектура (Ваші дані) ---
 const scheduleData = {
+  // ... (весь ваш об'єкт scheduleData без змін)
   weekdays: {
     "wd-basivka-1": ["5:45", "7:10", "8:30", "10:00", "12:30", "14:30", "16:00", "17:45", "19:45"],
     "wd-basivka-2": ["6:30", "7:50", "9:15", "11:00", "13:45", "15:15", "16:45", "18:45"],
@@ -60,7 +61,6 @@ function openTab(id) {
   activeTab.classList.add('active');
   activeTab.setAttribute('aria-selected', 'true');
   
-  // ПОКРАЩЕННЯ: Зберігаємо вибір користувача
   localStorage.setItem('lastTab', id);
 }
 
@@ -68,6 +68,7 @@ function openTab(id) {
  * Підсвічування рейсів
  */
 function highlightTimes() {
+  // ... (весь код функції highlightTimes без змін) ...
   const now = new Date();
 
   document.querySelectorAll('.times').forEach(container => {
@@ -116,6 +117,7 @@ function highlightTimes() {
  * "Розумний" таймер
  */
 function smartHighlightUpdate() {
+  // ... (весь код функції smartHighlightUpdate без змін) ...
   highlightTimes(); 
   
   const now = new Date();
@@ -132,12 +134,12 @@ function smartHighlightUpdate() {
  * Опівнічна зміна вкладки
  */
 function scheduleMidnightTabCheck() {
+  // ... (весь код функції scheduleMidnightTabCheck без змін) ...
   const now = new Date();
   const msUntilMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 5) - now; 
   
   setTimeout(() => {
     console.log("Опівніч! Перевіряємо вкладку.");
-    // ПОКРАЩЕННЯ: Опівночі скидаємо збережену вкладку, щоб спрацювала авто-логіка
     localStorage.removeItem('lastTab');
     
     const today = new Date().getDay();
@@ -147,17 +149,107 @@ function scheduleMidnightTabCheck() {
   }, msUntilMidnight);
 }
 
+/**
+ * ПОКРАЩЕННЯ: Логіка для кнопки "Наверх"
+ */
+const scrollTopBtn = document.getElementById('scrollTopBtn');
+// Коли користувач прокручує сторінку
+window.onscroll = () => {
+  if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) {
+    scrollTopBtn.style.display = "block";
+  } else {
+    scrollTopBtn.style.display = "none";
+  }
+};
+// Коли користувач натискає на кнопку
+scrollTopBtn.onclick = () => {
+  document.body.scrollTop = 0; // Для Safari
+  document.documentElement.scrollTop = 0; // Для Chrome, Firefox, IE та Opera
+};
+
+
+/**
+ * ПОКРАЩЕННЯ: Логіка реєстрації Service Worker та оновлень
+ */
+function registerSW() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js')
+      .then(registration => {
+        console.log('ServiceWorker зареєстровано успішно!');
+
+        // Ми знайшли воркера, що чекає на активацію
+        // Це означає, що є нова версія
+        if (registration.waiting) {
+          showUpdateToast(registration.waiting);
+          return;
+        }
+
+        // Ми відстежуємо майбутні оновлення
+        registration.onupdatefound = () => {
+          const newWorker = registration.installing;
+          newWorker.onstatechange = () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              // Нова версія встановлена і чекає
+              showUpdateToast(newWorker);
+            }
+          };
+        };
+      })
+      .catch(err => {
+        console.log('Помилка реєстрації ServiceWorker: ', err);
+      });
+
+    // Цей слухач потрібен, щоб перезавантажити сторінку,
+    // коли новий воркер нарешті активується
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!refreshing) {
+        window.location.reload();
+        refreshing = true;
+      }
+    });
+  }
+}
+
+/**
+ * ПОКРАЩЕННЯ: Функція для показу повідомлення про оновлення
+ * @param {ServiceWorker} worker - Новий service worker, що чекає
+ */
+function showUpdateToast(worker) {
+  // Створюємо HTML-елементи
+  const toast = document.createElement('div');
+  toast.className = 'update-toast';
+
+  const message = document.createElement('p');
+  message.textContent = 'Доступна нова версія розкладу!';
+  
+  const updateButton = document.createElement('button');
+  updateButton.textContent = 'Оновити';
+  
+  toast.appendChild(message);
+  toast.appendChild(updateButton);
+  document.body.appendChild(toast);
+
+  // При натисканні на кнопку, відправляємо повідомлення воркеру
+  updateButton.onclick = () => {
+    console.log('Натиснуто "Оновити"');
+    worker.postMessage({ action: 'SKIP_WAITING' });
+    // Service worker отримає це повідомлення, викличе skipWaiting()
+    // і активується, що викличе 'controllerchange' і перезавантажить сторінку
+  };
+}
+
+
 // --- ІНІЦІАЛІЗАЦІЯ САЙТУ ---
 
 // 1. Заповнюємо розклад
 populateTimes();
 
-// 2. ПОКРАЩЕННЯ: Автовибір вкладки з пам'яттю
+// 2. Автовибір вкладки з пам'яттю
 const savedTab = localStorage.getItem('lastTab');
 if (savedTab) {
-  openTab(savedTab); // Відкриваємо ту, що збережена
+  openTab(savedTab); 
 } else {
-  // Якщо нічого не збережено, вибираємо за днем тижня
   const today = new Date().getDay();
   if(today === 6 || today === 0) openTab('weekend'); else openTab('weekdays');
 }
@@ -168,38 +260,23 @@ smartHighlightUpdate();
 // 4. Встановлюємо таймер на опівнічну зміну вкладки
 scheduleMidnightTabCheck();
 
-// 5. ПОКРАЩЕННЯ: Кнопка "Поділитися"
+// 5. Кнопка "Поділитися"
 const shareButton = document.getElementById('shareButton');
-// Перевіряємо, чи браузер взагалі підтримує navigator.share
 if (navigator.share) {
   shareButton.addEventListener('click', async () => {
     try {
       await navigator.share({
         title: 'Розклад 171 (Басівка-Львів)',
         text: 'Актуальний офлайн-розклад маршрутки 171',
-        url: window.location.href // Ділимося поточною адресою
+        url: window.location.href 
       });
-      console.log('Сайтом успішно поділилися');
     } catch (err) {
       console.log('Помилка при спробі поділитися:', err);
     }
   });
 } else {
-  // Якщо функція не підтримується (напр. десктопний Firefox),
-  // просто ховаємо кнопку
   shareButton.style.display = 'none';
 }
 
-
-// 6. Реєстрація Service Worker
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('service-worker.js')
-      .then(registration => {
-        console.log('ServiceWorker зареєстровано успішно!');
-      })
-      .catch(err => {
-        console.log('Помилка реєстрації ServiceWorker: ', err);
-      });
-  });
-}
+// 6. ПОКРАЩЕННЯ: Запускаємо реєстрацію Service Worker
+registerSW();
