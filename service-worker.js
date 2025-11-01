@@ -1,8 +1,8 @@
-const CACHE_NAME = 'bus-schedule-v1.04';
+const CACHE_NAME = 'bus-schedule-v2';
 
-// Файли, які потрібно закешувати (список не змінився)
+// Файли для кешування
 const urlsToCache = [
-  '.', // Головна сторінка
+  '.', 
   'index.html',
   'style.css',
   'script.js',
@@ -10,31 +10,50 @@ const urlsToCache = [
   'icon.svg'
 ];
 
-// 1. Встановлення Service Worker: кешуємо файли
+// 1. Встановлення: Кешуємо файли
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('ServiceWorker: Кешуємо нову версію файлів (v2)');
+        console.log('ServiceWorker: Кешуємо нову версію файлів (v3)');
         return cache.addAll(urlsToCache);
       })
-      .then(() => {
-        // Примусово активуємо новий Service Worker одразу,
-        // не чекаючи, поки стара вкладка закриється
-        return self.skipWaiting();
-      })
+    // ПОКРАЩЕННЯ: Ми більше не викликаємо skipWaiting() тут.
+    // Ми чекаємо, поки користувач натисне кнопку "Оновити".
   );
 });
 
-// 2. Перехоплення запитів (Fetch): віддаємо з кешу
+// 2. Активація: Видаляємо старий кеш
+self.addEventListener('activate', event => {
+  const cacheWhitelist = [CACHE_NAME]; // Тільки v3 залишаємо
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
+            console.log('ServiceWorker: Видаляємо старий кеш', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+    .then(() => {
+      // Керуємо всіма відкритими вкладками
+      return self.clients.claim();
+    })
+  );
+});
+
+// 3. Перехоплення запитів (Fetch)
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
+        // Віддаємо з кешу, якщо є
         if (response) {
           return response;
         }
-        
+        // Інакше йдемо в мережу, кешуємо і віддаємо
         return fetch(event.request).then(
           response => {
             if (!response || response.status !== 200 || response.type !== 'basic') {
@@ -52,23 +71,10 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// 3. Активація Service Worker: очистка старого кешу
-self.addEventListener('activate', event => {
-  const cacheWhitelist = [CACHE_NAME]; // Тільки v2 залишаємо
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            console.log('ServiceWorker: Видаляємо старий кеш', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
-    .then(() => {
-      // Повідомляємо всі відкриті вкладки, що вони можуть оновитися
-      return self.clients.claim();
-    })
-  );
+// 4. ПОКРАЩЕННЯ: Слухаємо повідомлення від script.js
+self.addEventListener('message', event => {
+  if (event.data && event.data.action === 'SKIP_WAITING') {
+    console.log('ServiceWorker: Отримано команду skipWaiting()');
+    self.skipWaiting();
+  }
 });
