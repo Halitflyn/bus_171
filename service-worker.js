@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bus-schedule-v2';
+const CACHE_NAME = 'bus-schedule-v2.1';
 
 // Файли для кешування
 const urlsToCache = [
@@ -78,3 +78,4 @@ self.addEventListener('message', event => {
     self.skipWaiting();
   }
 });
+
