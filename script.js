@@ -1,15 +1,11 @@
 /**
- * Заповнює HTML-контейнери
- * @param {object} scheduleData - Об'єкт з даними розкладу
+ * Заповнює HTML-контейнери розкладом
  */
 function populateTimes(scheduleData) {
   if (!scheduleData) return;
 
-  // Проходимо по 'weekdays' та 'weekend'
   for (const dayType in scheduleData) {
-    // dayType буде 'weekdays' або 'weekend' (або 'lastUpdated')
     if (dayType === 'weekdays' || dayType === 'weekend') {
-      // Проходимо по кожному ID маршруту, напр. 'wd-basivka-1'
       for (const routeId in scheduleData[dayType]) {
         const timesArray = scheduleData[dayType][routeId];
         const container = document.getElementById(routeId);
@@ -25,21 +21,36 @@ function populateTimes(scheduleData) {
 
 /**
  * Оновлює дату "актуальності" в підвалі
- * @param {string} dateString - Дата у форматі 'YYYY-MM-DD'
  */
 function updateRelevanceDate(dateString) {
   const container = document.getElementById('last-updated');
   if (!container || !dateString) return;
 
   try {
-    // Перетворюємо 'YYYY-MM-DD' на 'DD.MM.YYYY'
     const [year, month, day] = dateString.split('-');
     const formattedDate = `${day}.${month}.${year}`;
     container.textContent = `Розклад актуальний станом на: ${formattedDate}`;
   } catch (e) {
     console.error("Неправильний формат дати:", e);
-    container.textContent = `Розклад актуальний`; // Запасний варіант
+    container.textContent = `Розклад актуальний`; 
   }
+}
+
+/**
+ * Генерує HTML для списку цін з даних JSON
+ */
+function populatePrices(pricesData) {
+  const container = document.getElementById('prices-container');
+  if (!container || !pricesData) return;
+
+  let html = '<p><strong>Вартість проїзду 🪙:</strong></p><ul class="price-list">';
+  
+  for (const [location, price] of Object.entries(pricesData)) {
+    html += `<li><span>Львів ↔ ${location}</span> <strong>${price}</strong></li>`;
+  }
+  
+  html += '</ul>';
+  container.innerHTML = html;
 }
 
 // --- Перемикач теми ---
@@ -170,8 +181,8 @@ window.onscroll = () => {
   }
 };
 scrollTopBtn.onclick = () => {
-  document.body.scrollTop = 0; // Safari
-  document.documentElement.scrollTop = 0; // Інші
+  document.body.scrollTop = 0; 
+  document.documentElement.scrollTop = 0; 
 };
 
 /**
@@ -213,7 +224,6 @@ function registerSW() {
 
 /**
  * Функція для показу повідомлення про оновлення
- * @param {ServiceWorker} worker - Новий service worker, що чекає
  */
 function showUpdateToast(worker) {
   const toast = document.createElement('div');
@@ -257,14 +267,9 @@ function setupShareButton() {
 
 // --- ІНІЦІАЛІЗАЦІЯ САЙТУ ---
 
-/**
- * Головна функція ініціалізації сайту
- */
 async function initializeSite() {
   let scheduleData;
   try {
-    // 1. Завантажуємо дані розкладу
-    // Додаємо ?t=... для "очищення кешу" файлу JSON
     const cacheBuster = new Date().getTime();
     const response = await fetch(`schedule.json?t=${cacheBuster}`);
     
@@ -273,23 +278,23 @@ async function initializeSite() {
     }
     scheduleData = await response.json();
 
-    // 2. Заповнюємо розклад
     populateTimes(scheduleData);
     
-    // 2.1 Встановлюємо дату актуальності
+    // Запускаємо функцію для цін
+    if (scheduleData.prices) {
+      populatePrices(scheduleData.prices);
+    }
+
     if (scheduleData.lastUpdated) {
       updateRelevanceDate(scheduleData.lastUpdated);
     }
 
   } catch (error) {
     console.error(error);
-    // Показати помилку користувачу, якщо дані не завантажились
     document.querySelector('main').innerHTML =
       '<p style="text-align:center; color:red; padding: 20px;">Не вдалося завантажити розклад. Спробуйте оновити сторінку.</p>';
-    // Не зупиняємо виконання, щоб решта сайту (тема, кнопки) працювала
   }
 
-  // 3. Автовибір вкладки з пам'яттю
   const savedTab = localStorage.getItem('lastTab');
   if (savedTab && document.getElementById(savedTab)) {
     openTab(savedTab);
@@ -298,16 +303,9 @@ async function initializeSite() {
     if (today === 6 || today === 0) openTab('weekend'); else openTab('weekdays');
   }
 
-  // 4. Запускаємо "розумний" таймер
   smartHighlightUpdate();
-
-  // 5. Встановлюємо таймер на опівнічну зміну вкладки
   scheduleMidnightTabCheck();
-
-  // 6. Кнопка "Поділитися"
   setupShareButton();
-
-  // 7. Запускаємо реєстрацію Service Worker
   registerSW();
 }
 
