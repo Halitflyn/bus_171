@@ -250,7 +250,7 @@ footer small {
 .price-list li {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: center; /* Центрує елементи по вертикалі */
   padding: 12px 16px;
   border-radius: 10px;
   transition: transform 0.2s, box-shadow 0.2s;
@@ -277,6 +277,7 @@ body.dark .price-list li:hover {
 .price-list li span {
   font-weight: 500;
   font-size: 1em;
+  line-height: 1.4; /* Додаємо міжрядковий інтервал для кращого вигляду двох рядків */
 }
 
 .price-list li strong {
@@ -286,6 +287,11 @@ body.dark .price-list li:hover {
   border-radius: 8px;
   font-size: 1.05em;
   box-shadow: 0 2px 5px rgba(76, 175, 80, 0.3);
+  
+  /* ВИПРАВЛЕННЯ ДЛЯ БЕЙДЖИКА: */
+  white-space: nowrap; /* Забороняємо перенесення на новий рядок (в один рядок) */
+  flex-shrink: 0;      /* Забороняємо бейджику стискатися */
+  margin-left: 15px;   /* Робимо відступ зліва, щоб текст не прилипав */
 }
 
 .time-info {
