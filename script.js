@@ -46,7 +46,15 @@ function populatePrices(pricesData) {
   let html = '<h4 style="margin-bottom: 15px; margin-top: 5px; color: var(--accent-color); font-size: 1.1em; text-align: center;">Вартість проїзду:</h4><ul class="price-list">';
   
   for (const [location, price] of Object.entries(pricesData)) {
-    html += `<li><span>Львів ↔ ${location}</span> <strong>${price}</strong></li>`;
+    // ВИПРАВЛЕННЯ: Додано <br> для переносу рядка
+    // Також "Львів ↔" зроблено трохи меншим для кращого візуального вигляду
+    html += `<li>
+               <span>
+                 <span style="opacity: 0.7; font-size: 0.85em;">Львів ↔</span><br>
+                 ${location}
+               </span> 
+               <strong>${price}</strong>
+             </li>`;
   }
   
   html += '</ul>';
