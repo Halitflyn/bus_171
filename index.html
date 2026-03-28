@@ -9,7 +9,6 @@
   <meta name="theme-color" content="#4caf50">
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-
 </head>
 <body class="light">
 
@@ -60,12 +59,11 @@
     <div class="grid-info">
       <div class="card info-card">
         <h3>Інформація про маршрут</h3>
-        <p>
-          <strong>Вартість проїзду:</strong><br>
-          в/з Сокільників, Малечковичів, Наварія: 30 грн<br>
-          в/з Годовиця: 34 грн<br>
-          в/з Дачі, Басівка: 35 грн
-        </p>
+        
+        <div id="prices-container">
+           <p style="opacity: 0.7;">Завантаження цін...</p>
+        </div>
+
         <p><strong>Приблизний час в дорозі:</strong> ~40-50 хв</p>
         
         <button id="shareButton">Поділитися сайтом</button>
@@ -77,7 +75,7 @@
   <footer>
     🚍 Розклад маршрутки №171 Басівка ↔ Львів<br>
     <small id="last-updated">Завантаження актуальної дати...</small><br>
-    Сайт створив Halitflyn © 2025
+    Сайт створив Halitflyn © 2026
   </footer>
   
   <button id="scrollTopBtn" title="Наверх">▲</button>
