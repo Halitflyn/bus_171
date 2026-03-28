@@ -43,7 +43,7 @@ function populatePrices(pricesData) {
   const container = document.getElementById('prices-container');
   if (!container || !pricesData) return;
 
-  let html = '<p><strong>Вартість проїзду 🪙:</strong></p><ul class="price-list">';
+  let html = '<h4 style="margin-bottom: 15px; margin-top: 5px; color: var(--accent-color); font-size: 1.1em; text-align: center;">Вартість проїзду:</h4><ul class="price-list">';
   
   for (const [location, price] of Object.entries(pricesData)) {
     html += `<li><span>Львів ↔ ${location}</span> <strong>${price}</strong></li>`;
