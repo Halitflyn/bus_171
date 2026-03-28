@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bus-schedule-v2.2';
+const CACHE_NAME = 'bus-schedule-v2.3';
 
 // Файли для кешування
 const urlsToCache = [
